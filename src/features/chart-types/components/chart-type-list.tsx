@@ -58,14 +58,14 @@ export function ChartTypeList() {
         </CardHeader>
         <CardContent className="text-amber-700 space-y-2 text-sm">
           <p>
-            <strong>기능 개요:</strong> 차트 유형 관리 페이지는 니트/뜨개 도안에서 사용되는 각종 차트 유형(패턴)을
+            <strong>기능 개요:</strong> 차트 유형 관리 페이지는 도안에서 사용되는 각종 차트 유형을
             정의하고 관리하는 페이지입니다. 차트 유형은 템플릿에서 참조되어 사용됩니다.
           </p>
           <p>
             <strong>주요 워크플로우:</strong>
           </p>
           <ol className="list-decimal pl-5 space-y-1">
-            <li>관리자가 다양한 차트 유형을 미리 등록 (예: 앞 몸판, 뒤 몸판, 소매 등)</li>
+            <li>관리자가 다양한 차트 유형을 미리 등록 (예: 브이넥 바텀업 앞몸판, 라운드넥 탑다운 상단, 소매 등)</li>
             <li>등록된 차트 유형은 템플릿 생성 시 선택 가능</li>
             <li>차트 유형별로 고유 ID와 표시 이름 관리</li>
             <li>불필요한 차트 유형은 삭제 가능 (연결된 템플릿이 없는 경우)</li>
@@ -77,7 +77,6 @@ export function ChartTypeList() {
             <li>차트 유형 삭제 시 연결된 템플릿이 있는지 확인 필요</li>
             <li>차트 유형과 템플릿은 M:N 관계 (템플릿은 여러 차트 유형 포함 가능)</li>
             <li>API 연동 시 필요한 엔드포인트: GET/POST/PUT/DELETE /api/chart-types</li>
-            <li>차트 유형 ID는 문자열 형태로 관리 (알파벳+숫자 조합)</li>
           </ul>
         </CardContent>
       </Card>
