@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MeasurementRuleForm } from "@/components/measurement-rules/measurement-rule-form";
+import { MeasurementRuleForm } from "@/features/measurement-rules/components/measurement-rule-form";
 import type { MeasurementRule } from "@/lib/data";
 import { useRouter } from "next/navigation";
 
