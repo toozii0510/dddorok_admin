@@ -9,9 +9,12 @@ export async function generateStaticParams() {
   }));
 }
 
-export default function TemplatePage({ params }: { params: { id: string } }) {
+export default async function TemplatePage({ params }: { params: { id: string } }) {
+  // Await the params to fix the error
+  const id = await Promise.resolve(params.id);
+
   // Find template by ID
-  const template = templates.find((t) => t.id === params.id);
+  const template = templates.find((t) => t.id === id);
 
   if (!template) {
     notFound();

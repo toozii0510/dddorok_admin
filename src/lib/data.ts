@@ -130,13 +130,96 @@ export type ConstructionMethod = '탑다운' | '바텀업' | '조각잇기형' |
 export type SleeveType = '래글런형' | '셋인형' | '요크형' | '새들숄더형' | '드롭숄더형' | '베스트형';
 export type NecklineType = '라운드넥' | '브이넥' | '스퀘어넥';
 
-// Measurement item types
-export const MEASUREMENT_ITEMS = [
-  '어깨처짐', '뒷목깊이', '앞목깊이', '진동길이', '옆길이', '목너비',
-  '어깨너비', '가슴너비', '소매 길이', '소매 너비', '손목 너비',
-  '소매 고무단 길이', '목 고무단 길이', '아랫단 고무단 길이'
-] as const;
+// Update measurement item types
+export type MeasurementItemData = {
+  id: string;
+  name: string;
+  category: string; // 항목 분류 (예: 상의, 하의, 소매 등 중분류 카테고리 기준)
+  section: string; // 세부 섹션 (몸통, 소매 등)
+  unit: string; // 단위 (cm, mm 등)
+  description: string; // 측정 방법 설명
+};
 
+// 하드코딩된 array 대신 API에서 가져올 측정 항목들
+export const measurementItems: MeasurementItemData[] = [
+  // 상의 관련 측정 항목
+  { id: 'shoulder_slope', name: '어깨처짐', category: '상의', section: '몸통', unit: 'cm', description: '어깨 기울기 측정' },
+  { id: 'shoulder_width', name: '어깨너비', category: '상의', section: '몸통', unit: 'cm', description: '어깨 끝점 간 거리' },
+  { id: 'back_neck_depth', name: '뒷목깊이', category: '상의', section: '몸통', unit: 'cm', description: '뒷목 깊이 측정' },
+  { id: 'front_neck_depth', name: '앞목깊이', category: '상의', section: '몸통', unit: 'cm', description: '앞목 깊이 측정' },
+  { id: 'neck_width', name: '목너비', category: '상의', section: '몸통', unit: 'cm', description: '목 둘레 측정' },
+  { id: 'chest_width', name: '가슴너비', category: '상의', section: '몸통', unit: 'cm', description: '가슴 둘레 측정' },
+  { id: 'waist_width', name: '허리 너비', category: '상의', section: '몸통', unit: 'cm', description: '허리 둘레 측정' },
+  { id: 'hip_width', name: '엉덩이 너비', category: '상의', section: '몸통', unit: 'cm', description: '엉덩이 둘레 측정' },
+  { id: 'total_length', name: '총장', category: '상의', section: '몸통', unit: 'cm', description: '어깨부터 아랫단까지 길이' },
+  { id: 'arm_hole_length', name: '진동길이', category: '상의', section: '몸통', unit: 'cm', description: '어깨부터 겨드랑이까지 길이' },
+  { id: 'side_length', name: '옆길이', category: '상의', section: '몸통', unit: 'cm', description: '겨드랑이부터 밑단까지 길이' },
+
+  { id: 'sleeve_length', name: '소매 길이', category: '상의', section: '소매', unit: 'cm', description: '어깨부터 소매 끝까지 길이' },
+  { id: 'sleeve_width', name: '소매 너비', category: '상의', section: '소매', unit: 'cm', description: '소매 통 둘레' },
+  { id: 'wrist_width', name: '손목 너비', category: '상의', section: '소매', unit: 'cm', description: '손목 둘레 측정' },
+
+  // 하의 관련 측정 항목
+  { id: 'waist_circumference', name: '허리둘레', category: '하의', section: '허리/엉덩이', unit: 'cm', description: '허리 둘레 측정' },
+  { id: 'hip_circumference', name: '엉덩이둘레', category: '하의', section: '허리/엉덩이', unit: 'cm', description: '엉덩이 둘레 측정' },
+  { id: 'rise', name: '밑위', category: '하의', section: '허리/엉덩이', unit: 'cm', description: '허리선에서 가랑이까지 길이' },
+
+  { id: 'thigh_width', name: '허벅지 너비', category: '하의', section: '다리', unit: 'cm', description: '허벅지 둘레 측정' },
+  { id: 'knee_width', name: '무릎 너비', category: '하의', section: '다리', unit: 'cm', description: '무릎 둘레 측정' },
+  { id: 'hem_width', name: '밑단 너비', category: '하의', section: '다리', unit: 'cm', description: '바지 밑단 너비 측정' },
+  { id: 'inseam', name: '인심', category: '하의', section: '다리', unit: 'cm', description: '가랑이에서 발목까지 길이' },
+  { id: 'outseam', name: '아웃심', category: '하의', section: '다리', unit: 'cm', description: '허리에서 발목까지 바깥쪽 길이' },
+
+  // 마감재 관련 측정 항목
+  { id: 'sleeve_ribbing_length', name: '소매 고무단 길이', category: '마감', section: '고무단/밴드', unit: 'cm', description: '소매 고무단 길이' },
+  { id: 'neck_ribbing_length', name: '목 고무단 길이', category: '마감', section: '고무단/밴드', unit: 'cm', description: '목 고무단 길이' },
+  { id: 'bottom_ribbing_length', name: '아랫단 고무단 길이', category: '마감', section: '고무단/밴드', unit: 'cm', description: '아랫단 고무단 길이' },
+  { id: 'waistband_width', name: '허리밴드 너비', category: '마감', section: '고무단/밴드', unit: 'cm', description: '허리밴드 너비 측정' },
+
+  // 액세서리 관련 측정 항목
+  { id: 'head_circumference', name: '머리둘레', category: '액세서리', section: '모자', unit: 'cm', description: '머리 둘레 측정' },
+  { id: 'hood_height', name: '후드 높이', category: '액세서리', section: '후드', unit: 'cm', description: '후드 높이 측정' },
+  { id: 'hood_width', name: '후드 너비', category: '액세서리', section: '후드', unit: 'cm', description: '후드 너비 측정' },
+  { id: 'pocket_width', name: '주머니 너비', category: '액세서리', section: '주머니', unit: 'cm', description: '주머니 너비 측정' },
+  { id: 'pocket_height', name: '주머니 높이', category: '액세서리', section: '주머니', unit: 'cm', description: '주머니 높이 측정' }
+];
+
+// 측정 항목 카테고리별 그룹핑 (프론트엔드에서 사용)
+export const measurementItemsByCategory = () => {
+  const grouped: Record<string, MeasurementItemData[]> = {};
+
+  measurementItems.forEach(item => {
+    const category = item.category;
+    if (!grouped[category]) {
+      grouped[category] = [];
+    }
+    grouped[category].push(item);
+  });
+
+  return grouped;
+};
+
+// 측정 항목 세부 섹션별 그룹핑 (프론트엔드에서 사용)
+export const measurementItemsBySection = () => {
+  const grouped: Record<string, Record<string, MeasurementItemData[]>> = {};
+
+  measurementItems.forEach(item => {
+    if (!grouped[item.category]) {
+      grouped[item.category] = {};
+    }
+
+    if (!grouped[item.category][item.section]) {
+      grouped[item.category][item.section] = [];
+    }
+
+    grouped[item.category][item.section].push(item);
+  });
+
+  return grouped;
+};
+
+// 기존 측정 항목 배열 (하위 호환성 유지)
+export const MEASUREMENT_ITEMS = measurementItems.map(item => item.name) as const;
 export type MeasurementItem = typeof MEASUREMENT_ITEMS[number];
 
 export const CONSTRUCTION_METHODS: ConstructionMethod[] = ['탑다운', '바텀업', '조각잇기형', '원통형'];
@@ -173,6 +256,24 @@ export type Template = {
   sizeDetails?: SizeDetail[]; // 각 사이즈별 세부 치수 정보
 };
 
+// Helper function to get measurement item by ID
+export const getMeasurementItemById = (id: string): MeasurementItemData | undefined => {
+  return measurementItems.find(item => item.id === id);
+};
+
+// Helper function to get measurement item by name (for backward compatibility)
+export const getMeasurementItemByName = (name: string): MeasurementItemData | undefined => {
+  return measurementItems.find(item => item.name === name);
+};
+
+// Helper function to get measurement item names from IDs
+export const getMeasurementItemNames = (itemIds: string[]): string[] => {
+  return itemIds.map(id => {
+    const item = getMeasurementItemById(id);
+    return item?.name || id;
+  });
+};
+
 // Sample template data
 export const templates: Template[] = [
   {
@@ -187,7 +288,7 @@ export const templates: Template[] = [
     constructionMethods: ['탑다운'],
     sleeveType: '래글런형',
     necklineType: '라운드넥',
-    measurementItems: ['어깨너비', '가슴너비', '소매 길이', '소매 너비', '손목 너비', '목너비'],
+    measurementItems: ['shoulder_width', 'chest_width', 'sleeve_length', 'sleeve_width', 'wrist_width', 'neck_width'],
     chartTypeIds: ['chart1'], // 배열로 변경
     measurementRuleId: 'rule1', // 래글런형 스웨터 치수 규칙 ID 연결
     sizeDetails: [
@@ -195,43 +296,43 @@ export const templates: Template[] = [
         sizeRange: '50-53',
         measurements: {
           "어깨처짐": 0.6,
-      "뒷목깊이": 1.2,
-      "앞목깊이": 1.8,
-      "진동길이": 13.0,
-      "옆길이": 22.0,
-      "목너비": 15.0,
-      "어깨너비": 30.0,
-      "가슴너비": 32.0,
-      "소매 길이": 40.0,
-      "소매 너비": 12.0,
-      "손목 너비": 6.0,
-      "소매 고무단 길이": 3,
-      "목 고무단 길이": 1.5,
-      "아랫단 고무단 길이": 3.0
+          "뒷목깊이": 1.2,
+          "앞목깊이": 1.8,
+          "진동길이": 13.0,
+          "옆길이": 22.0,
+          "목너비": 15.0,
+          "어깨너비": 30.0,
+          "가슴너비": 32.0,
+          "소매 길이": 40.0,
+          "소매 너비": 12.0,
+          "손목 너비": 6.0,
+          "소매 고무단 길이": 3,
+          "목 고무단 길이": 1.5,
+          "아랫단 고무단 길이": 3.0
         }
       },
       {
         sizeRange: '54-57',
         measurements: {
           "어깨처짐": 0.9,
-      "뒷목깊이": 1.5,
-      "앞목깊이": 1.8,
-      "진동길이": 14.5,
-      "옆길이": 23.0,
-      "목너비": 15.5,
-      "어깨너비": 32.0,
-      "가슴너비": 34.0,
-      "소매 길이": 45.0,
-      "소매 너비": 13.0,
-      "손목 너비": 6.0,
-      "소매 고무단 길이": 3,
-      "목 고무단 길이": 1.5,
-      "아랫단 고무단 길이": 3.0
+          "뒷목깊이": 1.5,
+          "앞목깊이": 1.8,
+          "진동길이": 14.5,
+          "옆길이": 23.0,
+          "목너비": 15.5,
+          "어깨너비": 32.0,
+          "가슴너비": 34.0,
+          "소매 길이": 45.0,
+          "소매 너비": 13.0,
+          "손목 너비": 6.0,
+          "소매 고무단 길이": 3,
+          "목 고무단 길이": 1.5,
+          "아랫단 고무단 길이": 3.0
         }
       },
       {
-        "sizeRange": "58-61",
-        "measurements": {
+        sizeRange: '58-61',
+        measurements: {
           "어깨처짐": 1.2,
           "뒷목깊이": 1.8,
           "앞목깊이": 1.8,
@@ -248,10 +349,9 @@ export const templates: Template[] = [
           "아랫단 고무단 길이": 3.0
         }
       },
-      
       {
-        "sizeRange": "62-65",
-        "measurements": {
+        sizeRange: '62-65',
+        measurements: {
           "어깨처짐": 1.5,
           "뒷목깊이": 1.8,
           "앞목깊이": 2.1,
@@ -269,8 +369,8 @@ export const templates: Template[] = [
         }
       },
       {
-        "sizeRange": "66-69",
-        "measurements": {
+        sizeRange: '66-69',
+        measurements: {
           "어깨처짐": 1.8,
           "뒷목깊이": 2.1,
           "앞목깊이": 2.1,
@@ -288,8 +388,8 @@ export const templates: Template[] = [
         }
       },
       {
-        "sizeRange": "70-73",
-        "measurements": {
+        sizeRange: '70-73',
+        measurements: {
           "어깨처짐": 2.1,
           "뒷목깊이": 2.1,
           "앞목깊이": 2.1,
@@ -307,8 +407,8 @@ export const templates: Template[] = [
         }
       },
       {
-        "sizeRange": "74-79",
-        "measurements": {
+        sizeRange: '74-79',
+        measurements: {
           "어깨처짐": 2.4,
           "뒷목깊이": 2.4,
           "앞목깊이": 2.4,
@@ -326,8 +426,8 @@ export const templates: Template[] = [
         }
       },
       {
-        "sizeRange": "80-84",
-        "measurements": {
+        sizeRange: '80-84',
+        measurements: {
           "어깨처짐": 2.4,
           "뒷목깊이": 2.4,
           "앞목깊이": 2.4,
@@ -345,8 +445,8 @@ export const templates: Template[] = [
         }
       },
       {
-        "sizeRange": "85-89",
-        "measurements": {
+        sizeRange: '85-89',
+        measurements: {
           "어깨처짐": 2.4,
           "뒷목깊이": 2.4,
           "앞목깊이": 2.4,
@@ -364,8 +464,8 @@ export const templates: Template[] = [
         }
       },
       {
-        "sizeRange": "90-94",
-        "measurements": {
+        sizeRange: '90-94',
+        measurements: {
           "어깨처짐": 2.4,
           "뒷목깊이": 2.4,
           "앞목깊이": 2.4,
@@ -383,8 +483,8 @@ export const templates: Template[] = [
         }
       },
       {
-        "sizeRange": "95-99",
-        "measurements": {
+        sizeRange: '95-99',
+        measurements: {
           "어깨처짐": 2.4,
           "뒷목깊이": 2.4,
           "앞목깊이": 2.4,
@@ -402,8 +502,8 @@ export const templates: Template[] = [
         }
       },
       {
-        "sizeRange": "100-104",
-        "measurements": {
+        sizeRange: '100-104',
+        measurements: {
           "어깨처짐": 2.4,
           "뒷목깊이": 2.4,
           "앞목깊이": 2.4,
@@ -421,8 +521,8 @@ export const templates: Template[] = [
         }
       },
       {
-        "sizeRange": "105-109",
-        "measurements": {
+        sizeRange: '105-109',
+        measurements: {
           "어깨처짐": 2.4,
           "뒷목깊이": 2.4,
           "앞목깊이": 2.4,
@@ -440,8 +540,8 @@ export const templates: Template[] = [
         }
       },
       {
-        "sizeRange": "110-114",
-        "measurements": {
+        sizeRange: '110-114',
+        measurements: {
           "어깨처짐": 2.4,
           "뒷목깊이": 2.4,
           "앞목깊이": 2.4,
@@ -459,8 +559,8 @@ export const templates: Template[] = [
         }
       },
       {
-        "sizeRange": "115-120",
-        "measurements": {
+        sizeRange: '115-120',
+        measurements: {
           "어깨처짐": 2.4,
           "뒷목깊이": 2.4,
           "앞목깊이": 2.4,
@@ -478,8 +578,8 @@ export const templates: Template[] = [
         }
       },
       {
-        "sizeRange": "121-129",
-        "measurements": {
+        sizeRange: '121-129',
+        measurements: {
           "어깨처짐": 2.4,
           "뒷목깊이": 2.4,
           "앞목깊이": 2.4,
@@ -545,7 +645,7 @@ export const templates: Template[] = [
     publishStatus: '공개',
     lastModified: '2024-04-09',
     categoryIds: [2, 20, 301],
-    measurementItems: ['머리둘레'],
+    measurementItems: ['head_circumference'],
     chartTypeIds: [] // 빈 배열 추가
   }
 ];
@@ -564,12 +664,13 @@ export const chartTypes: ChartType[] = [
   { id: 'chart6', name: '후드' }
 ];
 
+// Updated measurement rule type to use both id and name for compatibility
 export type MeasurementRule = {
   id: string;
   categoryId: number;
   sleeveType?: SleeveType;
   name: string;
-  items: MeasurementItem[];
+  items: string[]; // 측정 항목 ID 배열로 변경
 };
 
 // Updated measurement rules array
@@ -579,19 +680,28 @@ export const measurementRules: MeasurementRule[] = [
     categoryId: 103, // 스웨터
     sleeveType: '래글런형',
     name: '래글런형 스웨터',
-    items: ['어깨너비', '가슴너비', '소매 길이', '소매 너비', '손목 너비', '목너비']
+    items: ['shoulder_width', 'chest_width', 'sleeve_length', 'sleeve_width', 'wrist_width', 'neck_width']
   },
   {
     id: 'rule2',
     categoryId: 103, // 스웨터
     sleeveType: '셋인형',
     name: '셋인형 스웨터',
-    items: ['어깨너비', '가슴너비', '소매 길이', '소매 너비', '진동길이']
+    items: ['shoulder_width', 'chest_width', 'sleeve_length', 'sleeve_width', 'arm_hole_length']
   },
 ];
 
 // Function to check if a rule exists for a category and sleeve type
 export function findMeasurementRule(categoryId: number, sleeveType?: SleeveType): MeasurementRule | undefined {
+  // 디버그용 로그 추가
+  console.log(`Finding measurement rule for categoryId: ${categoryId}, sleeveType: ${sleeveType || 'undefined'}`);
+  console.log("Available rules:", measurementRules.map(r => ({
+    id: r.id,
+    categoryId: r.categoryId,
+    sleeveType: r.sleeveType || 'undefined',
+    match: r.categoryId === categoryId && (sleeveType ? r.sleeveType === sleeveType : !r.sleeveType)
+  })));
+
   if (sleeveType) {
     return measurementRules.find(rule =>
       rule.categoryId === categoryId && rule.sleeveType === sleeveType
@@ -599,6 +709,65 @@ export function findMeasurementRule(categoryId: number, sleeveType?: SleeveType)
   }
   return measurementRules.find(rule =>
     rule.categoryId === categoryId && !rule.sleeveType
+  );
+}
+
+// Function to get a measurement rule by ID
+export function getMeasurementRuleById(ruleId: string | undefined): MeasurementRule | undefined {
+  // ID가 없으면 undefined 반환
+  if (!ruleId) {
+    console.log("getMeasurementRuleById called with no ID");
+    return undefined;
+  }
+
+  // 문자열 변환 및 공백 제거 후 비교
+  const normalizedId = String(ruleId).trim();
+  console.log(`Looking for rule with normalized ID: "${normalizedId}"`);
+
+  // 이용 가능한 규칙 ID 로깅
+  const availableRuleIds = measurementRules.map(r => r.id);
+  console.log("Available rule IDs:", availableRuleIds);
+
+  // 정확한 일치 먼저 시도
+  let rule = measurementRules.find(r => r.id === normalizedId);
+  if (rule) {
+    console.log(`Found rule by exact match: ${rule.name}`);
+    return rule;
+  }
+
+  // 문자열 변환 후 시도
+  rule = measurementRules.find(r => String(r.id).trim() === normalizedId);
+  if (rule) {
+    console.log(`Found rule by string comparison: ${rule.name}`);
+    return rule;
+  }
+
+  // 대소문자 무시 비교
+  rule = measurementRules.find(r =>
+    String(r.id).trim().toLowerCase() === normalizedId.toLowerCase()
+  );
+  if (rule) {
+    console.log(`Found rule by case-insensitive comparison: ${rule.name}`);
+    return rule;
+  }
+
+  console.log(`No rule found with ID "${normalizedId}"`);
+  return undefined;
+}
+
+// Function to check if a rule would be a duplicate (excluding own ID when editing)
+export function isDuplicateMeasurementRule(categoryId: number, sleeveType?: SleeveType, excludeId?: string): boolean {
+  if (sleeveType) {
+    return measurementRules.some(rule =>
+      rule.categoryId === categoryId &&
+      rule.sleeveType === sleeveType &&
+      (!excludeId || rule.id !== excludeId)
+    );
+  }
+  return measurementRules.some(rule =>
+    rule.categoryId === categoryId &&
+    !rule.sleeveType &&
+    (!excludeId || rule.id !== excludeId)
   );
 }
 

@@ -5,7 +5,8 @@ import {
   Ruler,
   BarChart3,
   LayoutTemplate,
-  Users
+  Users,
+  FileText
 } from "lucide-react";
 
 export interface SidebarNavItem {
@@ -15,6 +16,11 @@ export interface SidebarNavItem {
 }
 
 export const navItems: SidebarNavItem[] = [
+  {
+    title: "개발자 가이드",
+    href: "/developer-guide",
+    icon: FileText,
+  },
   {
     title: "치수 규칙 설정",
     href: "/measurement-rules",

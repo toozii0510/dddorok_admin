@@ -4,10 +4,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { chartTypes, type ChartType } from "@/lib/data";
-import { PlusCircle, Edit, Trash, Eye } from "lucide-react";
 import Link from "next/link";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 
 export function ChartTypeList() {
   const [chartTypesList, setChartTypesList] = useState<ChartType[]>(chartTypes);
@@ -38,12 +40,51 @@ export function ChartTypeList() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6">
+      <div>
         <h2 className="text-2xl font-bold">차트 유형 관리</h2>
+        <p className="text-muted-foreground">
+          차트 유형을 관리합니다. 새 차트 유형을 추가하거나 기존 유형을 수정할 수 있습니다.
+        </p>
+      </div>
+
+      {/* 기획 의도 및 개발자를 위한 설명 카드 */}
+      <Card className="bg-amber-50 border-amber-200">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-amber-800 flex items-center gap-2 text-lg">
+            <Info className="h-5 w-5" />
+            기획 의도 및 개발 지침
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-amber-700 space-y-2 text-sm">
+          <p>
+            <strong>기능 개요:</strong> 차트 유형 관리 페이지는 니트/뜨개 도안에서 사용되는 각종 차트 유형(패턴)을
+            정의하고 관리하는 페이지입니다. 차트 유형은 템플릿에서 참조되어 사용됩니다.
+          </p>
+          <p>
+            <strong>주요 워크플로우:</strong>
+          </p>
+          <ol className="list-decimal pl-5 space-y-1">
+            <li>관리자가 다양한 차트 유형을 미리 등록 (예: 앞 몸판, 뒤 몸판, 소매 등)</li>
+            <li>등록된 차트 유형은 템플릿 생성 시 선택 가능</li>
+            <li>차트 유형별로 고유 ID와 표시 이름 관리</li>
+            <li>불필요한 차트 유형은 삭제 가능 (연결된 템플릿이 없는 경우)</li>
+          </ol>
+          <p>
+            <strong>개발 참고사항:</strong>
+          </p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>차트 유형 삭제 시 연결된 템플릿이 있는지 확인 필요</li>
+            <li>차트 유형과 템플릿은 M:N 관계 (템플릿은 여러 차트 유형 포함 가능)</li>
+            <li>API 연동 시 필요한 엔드포인트: GET/POST/PUT/DELETE /api/chart-types</li>
+            <li>차트 유형 ID는 문자열 형태로 관리 (알파벳+숫자 조합)</li>
+          </ul>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end">
         <Link href="/chart-types/new">
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
+          <Button size="lg">
             새 차트 유형 추가
           </Button>
         </Link>
@@ -71,30 +112,31 @@ export function ChartTypeList() {
                   <TableCell className="font-medium">{chartType.id}</TableCell>
                   <TableCell>{chartType.name}</TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
+                    <div className="flex flex-wrap justify-end gap-2">
                       <Button
                         variant="outline"
-                        size="icon"
+                        size="sm"
                         onClick={() => setViewChartType(chartType)}
                       >
-                        <Eye className="h-4 w-4" />
+                        상세보기
                       </Button>
                       <Link href={`/chart-types/${chartType.id}`}>
-                        <Button variant="outline" size="icon">
-                          <Edit className="h-4 w-4" />
+                        <Button variant="outline" size="sm">
+                          수정
                         </Button>
                       </Link>
                       <Dialog open={isDeleteDialogOpen && deleteChartTypeId === chartType.id} onOpenChange={setIsDeleteDialogOpen}>
                         <DialogTrigger asChild>
                           <Button
                             variant="outline"
-                            size="icon"
+                            size="sm"
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
                             onClick={() => {
                               setDeleteChartTypeId(chartType.id);
                               setIsDeleteDialogOpen(true);
                             }}
                           >
-                            <Trash className="h-4 w-4" />
+                            삭제
                           </Button>
                         </DialogTrigger>
                         <DialogContent>
@@ -129,6 +171,14 @@ export function ChartTypeList() {
         </Table>
       </div>
 
+      <Alert variant="default" className="bg-blue-50 border-blue-200 text-blue-800">
+        <Info className="h-4 w-4" />
+        <AlertDescription>
+          <p><strong>샘플 데이터 안내:</strong> 현재 보이는 데이터는 예시용입니다. 실제 구현 시 백엔드 API와 연동하여 실제 데이터를 표시해야 합니다.</p>
+          <p className="mt-1"><strong>연관 관계:</strong> 차트 유형은 템플릿의 chartTypeIds 배열 필드에서 참조됩니다.</p>
+        </AlertDescription>
+      </Alert>
+
       {/* Chart Type Details Dialog */}
       {viewChartType && (
         <Dialog open={!!viewChartType} onOpenChange={(open) => !open && setViewChartType(null)}>
@@ -150,10 +200,15 @@ export function ChartTypeList() {
                   </div>
                 </div>
               </div>
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  <strong>개발 참고:</strong> 실제 구현 시 이 다이얼로그에 차트 유형을 사용하는 템플릿 목록 표시 기능 추가 필요
+                </p>
+              </div>
             </div>
             <DialogFooter>
               <Link href={`/chart-types/${viewChartType.id}`}>
-                <Button>수정</Button>
+                <Button>차트 유형 수정</Button>
               </Link>
             </DialogFooter>
           </DialogContent>

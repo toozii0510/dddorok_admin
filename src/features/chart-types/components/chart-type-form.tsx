@@ -8,8 +8,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Stepper, Step } from "@/components/ui/stepper";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { InfoIcon, Trash2 } from "lucide-react";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { MeasurementItem, SizeRange } from "@/lib/data";
 import { MEASUREMENT_ITEMS, SIZE_RANGES } from "@/lib/data";
 
@@ -210,15 +208,19 @@ export function ChartTypeForm({ chartType, onSubmit }: ChartTypeFormProps) {
             <CardContent>
               {/* 캔버스 영역 */}
               <div
-                ref={canvasRef}
-                className="relative w-full min-h-[800px] border bg-white cursor-crosshair"
-                onClick={handleCanvasClick}
-                style={{
-                  backgroundImage:
-                    'linear-gradient(to right, #ddd 1px, transparent 1px), linear-gradient(to bottom, #ddd 1px, transparent 1px)',
-                  backgroundSize: "50px 50px"
-                }}
-              >
+          ref={canvasRef}
+          className="relative w-[1600px] h-[1600px] border bg-white cursor-crosshair"
+          onClick={handleCanvasClick}
+              style={{
+                backgroundImage:
+                  'linear-gradient(to right, #ddd 1px, transparent 1px), linear-gradient(to bottom, #ddd 1px, transparent 1px)',
+                backgroundSize: "20px 20px",
+                height: "800px",
+              }}
+            >
+
+<div className="w-full h-full opacity-0 pointer-events-none">canvas-area</div>
+
                 {coordinates.map((coord, idx) => (
                   <div
                     key={`point-${idx}`}

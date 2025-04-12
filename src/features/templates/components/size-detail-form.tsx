@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,10 +30,11 @@ import {
   type SizeRange,
   SIZE_RANGES,
   measurementRules,
-  MEASUREMENT_ITEMS
+  MEASUREMENT_ITEMS,
+  getMeasurementItemById
 } from "@/lib/data";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Info } from "lucide-react";
+import { AlertCircle, Info, FileText, Copy } from "lucide-react";
 
 interface SizeDetailFormProps {
   template: Template;
@@ -42,9 +43,10 @@ interface SizeDetailFormProps {
 
 export function SizeDetailForm({ template, onSubmit }: SizeDetailFormProps) {
   const [measurementRule, setMeasurementRule] = useState<MeasurementRule | undefined>();
-  const [selectedItems, setSelectedItems] = useState<MeasurementItem[]>([]);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]); // 항목 ID 배열로 변경
   const [sizeRanges, setSizeRanges] = useState<SizeRange[]>([]);
-  const [sizeDetails, setSizeDetails] = useState<Record<SizeRange, Record<MeasurementItem, string>>>({});
+  const [sizeDetails, setSizeDetails] = useState<Record<SizeRange, Record<string, string>>>({});
+  const tableRef = useRef<HTMLTableElement>(null);
 
   // Process size details table data when measurement rule is available
   useEffect(() => {
@@ -60,7 +62,7 @@ export function SizeDetailForm({ template, onSubmit }: SizeDetailFormProps) {
         setSizeRanges(SIZE_RANGES);
 
         // 기존 사이즈 세부 정보 로드 또는 새 빈 객체 초기화
-        const details: Record<SizeRange, Record<MeasurementItem, string>> = {};
+        const details: Record<SizeRange, Record<string, string>> = {};
 
         // 모든 사이즈 범위에 대해 빈 데이터 구조 초기화
         for (const size of SIZE_RANGES) {
@@ -74,7 +76,23 @@ export function SizeDetailForm({ template, onSubmit }: SizeDetailFormProps) {
         if (template.sizeDetails && template.sizeDetails.length > 0) {
           for (const detail of template.sizeDetails) {
             for (const [item, value] of Object.entries(detail.measurements)) {
-              details[detail.sizeRange][item as MeasurementItem] = value.toString();
+              // 항목 ID를 찾기
+              const itemId = selectedItems.find(id => {
+                const measurementItem = getMeasurementItemById(id);
+                return measurementItem && measurementItem.name === item;
+              });
+
+              if (itemId) {
+                details[detail.sizeRange][itemId] = value.toString();
+              } else {
+                // 기존 방식으로 처리 (호환성 유지)
+                const matchingItemId = selectedItems.find(id => {
+                  return id === item;
+                });
+                if (matchingItemId) {
+                  details[detail.sizeRange][matchingItemId] = value.toString();
+                }
+              }
             }
           }
         }
@@ -85,14 +103,67 @@ export function SizeDetailForm({ template, onSubmit }: SizeDetailFormProps) {
   }, [template]);
 
   // 셀 값 변경 처리
-  const handleCellChange = (sizeRange: SizeRange, item: MeasurementItem, value: string) => {
+  const handleCellChange = (sizeRange: SizeRange, itemId: string, value: string) => {
     setSizeDetails(prev => ({
       ...prev,
       [sizeRange]: {
         ...prev[sizeRange],
-        [item]: value
+        [itemId]: value
       }
     }));
+  };
+
+  // 붙여넣기 이벤트 처리
+  const handlePaste = (e: React.ClipboardEvent<HTMLTableElement>) => {
+    e.preventDefault();
+
+    const clipboardData = e.clipboardData;
+    const pastedData = clipboardData.getData('text');
+    const rows = pastedData.split('\n').filter(row => row.trim());
+
+    // 이벤트가 발생한 셀 위치 찾기
+    const activeElement = document.activeElement;
+    if (!activeElement || !(activeElement instanceof HTMLInputElement || activeElement instanceof HTMLTableCellElement)) {
+      return;
+    }
+
+    let targetCell = activeElement;
+    if (activeElement instanceof HTMLInputElement) {
+      targetCell = activeElement.closest('td') as HTMLTableCellElement;
+    }
+
+    if (!targetCell) return;
+
+    // 행과 열 인덱스 찾기
+    const rowIndex = Array.from(targetCell.parentElement?.parentElement?.children || []).indexOf(targetCell.parentElement as HTMLTableRowElement);
+    const colIndex = Array.from(targetCell.parentElement?.children || []).indexOf(targetCell);
+
+    if (rowIndex === -1 || colIndex === -1) return;
+
+    // 새 데이터로 상태 업데이트
+    const newSizeDetails = { ...sizeDetails };
+    const tableRows = Array.from(tableRef.current?.querySelectorAll('tbody tr') || []);
+    const headerCells = Array.from(tableRef.current?.querySelectorAll('thead th') || []);
+
+    rows.forEach((rowData, rowOffset) => {
+      const columns = rowData.split('\t');
+      columns.forEach((cellData, colOffset) => {
+        const targetRowIndex = rowIndex + rowOffset;
+        const targetColIndex = colIndex + colOffset;
+
+        if (targetRowIndex < tableRows.length && targetColIndex > 0 && targetColIndex < headerCells.length) {
+          const itemRow = tableRows[targetRowIndex];
+          const itemId = selectedItems[targetRowIndex];
+          const sizeRange = headerCells[targetColIndex].textContent as SizeRange;
+
+          if (itemId && sizeRange && newSizeDetails[sizeRange]) {
+            newSizeDetails[sizeRange][itemId] = cellData.trim();
+          }
+        }
+      });
+    });
+
+    setSizeDetails(newSizeDetails);
   };
 
   // 폼 제출 처리
@@ -101,9 +172,13 @@ export function SizeDetailForm({ template, onSubmit }: SizeDetailFormProps) {
     const formattedSizeDetails: SizeDetail[] = Object.entries(sizeDetails).map(([size, measurements]) => {
       const measurementObj: Record<MeasurementItem, number> = {} as Record<MeasurementItem, number>;
 
-      for (const [item, value] of Object.entries(measurements)) {
+      for (const [itemId, value] of Object.entries(measurements)) {
+        // 측정 항목 이름 가져오기
+        const item = getMeasurementItemById(itemId);
+        const itemName = item ? item.name : itemId;
+
         // 빈 값은 0으로 처리
-        measurementObj[item as MeasurementItem] = value ? Number.parseFloat(value) : 0;
+        measurementObj[itemName as MeasurementItem] = value ? Number.parseFloat(value) : 0;
       }
 
       return {
@@ -165,23 +240,33 @@ export function SizeDetailForm({ template, onSubmit }: SizeDetailFormProps) {
     return sizeRanges;
   };
 
+  // 측정 항목 ID로부터 한글 이름 가져오기
+  const getItemName = (itemId: string) => {
+    const item = getMeasurementItemById(itemId);
+    return item ? item.name : itemId;
+  };
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>템플릿 세부 치수 입력</CardTitle>
           <CardDescription>
-            각 사이즈별 세부 치수를 입력해주세요.
+            각 사이즈별 세부 치수를 입력해주세요. 엑셀에서 복사한 데이터를 붙여넣기하여 여러 셀을 한번에 입력할 수 있습니다.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <div className="mb-3">
+            <div className="mb-3 flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
                 <strong>min</strong>과 <strong>max</strong>는 사용자가 프로젝트 생성 시 세부 치수를 조정할 수 있는 범위입니다. 보통 1~5cm 내외로 설정합니다.
               </p>
+              <div className="flex items-center gap-2 text-sm text-blue-600">
+                <FileText className="h-4 w-4" />
+                <span>엑셀에서 복사한 데이터를 붙여넣기할 수 있습니다.</span>
+              </div>
             </div>
-            <Table className="border">
+            <Table className="border" ref={tableRef} onPaste={handlePaste}>
               <TableHeader className="bg-gray-50">
                 <TableRow>
                   <TableHead className="w-[150px] font-bold border">측정 항목</TableHead>
@@ -193,21 +278,18 @@ export function SizeDetailForm({ template, onSubmit }: SizeDetailFormProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {selectedItems.map((item) => (
-                  <TableRow key={item} className="border">
-                    <TableCell className="font-medium border">{item}</TableCell>
+                {selectedItems.map((itemId) => (
+                  <TableRow key={itemId} className="border">
+                    <TableCell className="font-medium border">{getItemName(itemId)}</TableCell>
                     {displayOrderedSizeRanges().map((size) => (
                       <TableCell
-                        key={`${item}-${size}`}
-                        className={`p-2 border ${(size === 'min' || size === 'max') ? 'bg-blue-50' : ''}`}
+                        key={`${itemId}-${size}`}
+                        className={`p-0 border ${(size === 'min' || size === 'max') ? 'bg-blue-50' : ''}`}
+                        contentEditable
+                        onBlur={(e) => handleCellChange(size, itemId, e.currentTarget.textContent || '')}
+                        suppressContentEditableWarning
                       >
-                        <Input
-                          type="number"
-                          step="0.1"
-                          value={sizeDetails[size]?.[item] || ''}
-                          onChange={(e) => handleCellChange(size, item, e.target.value)}
-                          className="w-full text-center"
-                        />
+                        {sizeDetails[size]?.[itemId] || ''}
                       </TableCell>
                     ))}
                   </TableRow>
