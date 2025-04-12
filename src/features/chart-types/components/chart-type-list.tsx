@@ -75,7 +75,6 @@ export function ChartTypeList() {
           </p>
           <ul className="list-disc pl-5 space-y-1">
             <li>차트 유형 삭제 시 연결된 템플릿이 있는지 확인 필요</li>
-            <li>향후 차트 유형별 아이콘/이미지 추가 기능 고려</li>
             <li>차트 유형과 템플릿은 M:N 관계 (템플릿은 여러 차트 유형 포함 가능)</li>
             <li>API 연동 시 필요한 엔드포인트: GET/POST/PUT/DELETE /api/chart-types</li>
             <li>차트 유형 ID는 문자열 형태로 관리 (알파벳+숫자 조합)</li>
