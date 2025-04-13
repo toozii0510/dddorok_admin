@@ -87,7 +87,7 @@ export default function UsersPage() {
         </CardContent>
       </Card>
 
-      <Alert variant="info" className="bg-blue-50 border-blue-200 text-blue-800">
+      <Alert variant="default" className="bg-blue-50 border-blue-200 text-blue-800">
         <Info className="h-4 w-4" />
         <AlertDescription>
           <p><strong>샘플 데이터 안내:</strong> 현재 보이는 데이터는 예시용입니다. 실제 구현 시 백엔드 API와 연동하여 실제 데이터를 표시해야 합니다.</p>

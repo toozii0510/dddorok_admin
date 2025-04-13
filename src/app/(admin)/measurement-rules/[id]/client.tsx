@@ -116,7 +116,7 @@ export default function EditMeasurementRuleClient({ id }: EditMeasurementRuleCli
         <p className="text-muted-foreground">측정 규칙을 수정합니다.</p>
       </div>
 
-      <Alert variant="info" className="bg-blue-50 border-blue-200 text-blue-800">
+      <Alert variant="default" className="bg-blue-50 border-blue-200 text-blue-800">
         <Info className="h-4 w-4" />
         <AlertDescription>
           <strong>중복 방지:</strong> 수정 시에도 동일한 카테고리와 소매 유형 조합으로 이미 다른 규칙이 존재하는 경우 중복 생성이 방지됩니다.

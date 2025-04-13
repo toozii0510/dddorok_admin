@@ -96,8 +96,8 @@ export function Stepper({
             <div
               key={index}
               className={cn(
-                "w-full transition-all duration-300",
-        isActive ? "block" : "absolute opacity-0 pointer-events-none"
+                "flex flex-col",
+                isActive ? "block" : "hidden"
               )}
             >
               <div className="mb-4">
